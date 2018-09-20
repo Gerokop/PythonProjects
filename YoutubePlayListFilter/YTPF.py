@@ -61,6 +61,7 @@ class YTScraper():
                 Program.pls[0].videos.append(Video(find1,tag))
             else:
                 continue
+            
                 
 
 class PlayList():
