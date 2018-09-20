@@ -37,31 +37,34 @@ class YTScraper():
 
 
     def scrapeandadd(self):
-
+        
+        listname = []
+        listurl = []
         html = urllib.request.urlopen(self.site)
         html = html.read()
         sp = BeautifulSoup(html, 'html.parser')
+        site = str(sp)
         for tag in sp.find_all('a'):
             tag = tag.get('href')
             if 'list' in tag and 'accounts' not in tag:
                 tag = str(tag)
-                tag = 'https://www.youtube.com' + tag
-                html = urllib.request.urlopen(tag)
-                html = html.read()
-                html = str(html)
-                html = html.replace(r'\n','')
-                find1 = re.findall('<h1.*?h1>',html,re.IGNORECASE)
-                find1 = '\n'.join(find1)
-                find1 = re.findall('">.*?</span>',find1,re.IGNORECASE)
-                find1 = '\n'.join(find1)
-                find1 = re.findall('>.*?<',find1,re.IGNORECASE)
-                find1 = ''.join(find1)
-                find1 = find1[1:-1]
-                find1 = find1.strip()
-                Program.pls[0].videos.append(Video(find1,tag))
+                tag1 = 'https://www.youtube.com' + tag
+                listurl.append(tag1)
             else:
                 continue
-            
+        name = re.findall('t=0s.*?a>',site,re.DOTALL)
+        name = ''.join(name)
+        name = re.findall(r'\n  .*?\n  ',name,re.DOTALL)
+        for i in name:
+            i = name.index(i)
+            name[i] = name[i][7:-3]
+            name[i].strip()
+            print(name[i])
+            listname.append(name[i])
+        listurl = listurl[1:-1]
+        print(listurl)
+        print('\n')
+        print(listname)
                 
 
 class PlayList():
