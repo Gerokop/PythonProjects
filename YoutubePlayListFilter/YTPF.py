@@ -1,22 +1,54 @@
 import re
+from random import randrange
 import urllib.request
 from bs4 import BeautifulSoup
+import webbrowser
+import time
 
 class Program():
 
     pls = []
-    unused = []
 
     def __init__(self):
-
+        
+        self.flowed = []
+        self.filter = []
         url = input('Вставьте ссылку на плейлист: ')
-        url = 'https://www.youtube.com/playl\
-ist?list=PLGxKKdc3OAhhu2vAPgUHzSTJOYXLBKMf6'
         pl = PlayList(url)
         Program.pls.append(pl)
         YTScraper(url).scrapeandadd()
+        print(Program.pls[0].videos)
+        while True:
+            if self.flowed == []:
+                self.web()
+            elif self.flowed.index(self.flowed[-1]) != Program.pls[0].videos\
+                   .index(Program.pls[0].videos[-1]):
+                self.web()
+            else:
+                self.flowed = []
+
+    def web(self):
         
-        
+        repeat = True
+        while repeat == True:
+            i = randrange(0,Program.pls[0].videos.index(Program.pls[0].videos[-1])+1)
+            if Program.pls[0].videos[i] not in self.flowed:
+                repeat = False
+            else:
+                repeat = True
+        print(Program.pls[0].videos[i].url)
+        url = Program.pls[0].videos[i].url
+        html = urllib.request(url)
+        html = html.read()
+        site = str(html)
+        print(site)
+        t = re.findall('',site,re.DOTALL)
+
+    def kok(self):
+        webbrowser.open_new_tab(Program.pls[0].videos[i].url)
+        self.flowed.append(Program.pls[0].videos[i].url)
+
+            
 
 class Video():
 
@@ -59,12 +91,10 @@ class YTScraper():
             i = name.index(i)
             name[i] = name[i][7:-3]
             name[i].strip()
-            print(name[i])
             listname.append(name[i])
         listurl = listurl[1:-1]
-        print(listurl)
-        print('\n')
-        print(listname)
+        for i in range(0,listname.index(listname[-1])):
+            Program.pls[0].videos.append(Video(listname[i],listurl[i]))
                 
 
 class PlayList():
