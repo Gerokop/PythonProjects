@@ -1,9 +1,13 @@
 import re
+from selenium.webdriver.common.action_chains import ActionChains
 from random import randrange
 import urllib.request
 from bs4 import BeautifulSoup
 import webbrowser
 import time
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+
 
 class Program():
 
@@ -11,6 +15,7 @@ class Program():
 
     def __init__(self):
         
+        self.driver = webdriver.Chrome()        
         self.flowed = []
         self.filter = []
         url = input('Вставьте ссылку на плейлист: ')
@@ -18,14 +23,15 @@ class Program():
         Program.pls.append(pl)
         YTScraper(url).scrapeandadd()
         print(Program.pls[0].videos)
+        self.driver.get(url)
         while True:
             if self.flowed == []:
                 self.web()
-            elif self.flowed.index(self.flowed[-1]) != Program.pls[0].videos\
-                   .index(Program.pls[0].videos[-1]):
+            elif len(self.flowed) != len(Program.pls[0].videos):
                 self.web()
             else:
                 self.flowed = []
+                self.web()
 
     def web(self):
         
@@ -36,14 +42,35 @@ class Program():
                 repeat = False
             else:
                 repeat = True
-        print(Program.pls[0].videos[i].url)
         url = Program.pls[0].videos[i].url
-        html = urllib.request(url)
-        html = html.read()
-        site = str(html)
-        print(site)
-        t = re.findall('',site,re.DOTALL)
+        self.driver.get(url)
+        time.sleep(1)
+        self.check(url)
+        self.flowed.append(Program.pls[0].videos[i])
 
+    def check(self,url):
+        
+        repeat = True
+        while repeat == True:
+            time.sleep(0.5)
+            code = self.driver.page_source
+            code = str(code)
+            timecurrent = re.findall('ytp-time-current.*?span',code,re.DOTALL)
+            timeduration = re.findall('ytp-time-duration.*?span',code,re.DOTALL)
+            timecurrent = re.findall('\d',timecurrent[0])
+            timeduration = re.findall('\d',timeduration[0])
+            timecurrent = ''.join(timecurrent)
+            timeduration = ''.join(timeduration)
+            timecurrent = int(timecurrent)
+            timeduration = int(timeduration)
+            print('\n')
+            print(timecurrent)
+            print(self.flowed)
+            if timecurrent == (timeduration-1) or timecurrent >= timeduration:
+                repeat = False
+            else:
+                repeat = True
+        
     def kok(self):
         webbrowser.open_new_tab(Program.pls[0].videos[i].url)
         self.flowed.append(Program.pls[0].videos[i].url)
@@ -81,6 +108,8 @@ class YTScraper():
             if 'list' in tag and 'accounts' not in tag:
                 tag = str(tag)
                 tag1 = 'https://www.youtube.com' + tag
+                tag1 = tag1.split('list')
+                tag1 = tag1[0] + tag1[-1]
                 listurl.append(tag1)
             else:
                 continue
@@ -93,7 +122,7 @@ class YTScraper():
             name[i].strip()
             listname.append(name[i])
         listurl = listurl[1:-1]
-        for i in range(0,listname.index(listname[-1])):
+        for i in range(0,len(listname)):
             Program.pls[0].videos.append(Video(listname[i],listurl[i]))
                 
 
